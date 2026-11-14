@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Word Bolt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@700&family=Fredoka:wght@600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div id="hearts" aria-label="hearts"></div>
+    <div id="zonebar"><span id="zonebadge">o</span><span id="dots"></span></div>
+    <div id="botbar"><span class="botname" id="botname"></span><span id="bothp"><i></i></span></div>
+  </div>
+
+  <div id="scene">
+    <svg id="stage" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+      <g id="bg"></g>  <!-- the world: drawn by js/art.js SCENES -->
+
+      <g id="oil" opacity="0"><ellipse cx="226" cy="342" rx="104" ry="17" fill="#2A2438"/><ellipse cx="196" cy="338" rx="30" ry="4" fill="#fff" opacity=".25"/><ellipse cx="270" cy="346" rx="18" ry="3" fill="#8D7BD8" opacity=".5"/></g>
+      <!-- hero -->
+      <g id="hero"><g id="heroInner" transform="translate(150,112) scale(1.48)"></g></g>
+
+      <!-- hero blast toward the bot -->
+      <polyline id="blast" points="335,226 400,206 390,232 470,204 460,230 560,206 600,222" fill="none" stroke="#FFC531" stroke-width="10" stroke-linejoin="round" stroke-linecap="round" opacity="0"/>
+      <!-- bot zap toward the hero -->
+      <polyline id="zap" points="612,206 560,220 570,196 480,224 490,200 400,226 330,210" fill="none" stroke="#FF5A4E" stroke-width="9" stroke-linejoin="round" stroke-linecap="round" opacity="0"/>
+
+      <!-- robot (drawn by js/art.js) -->
+      <g id="bot"><g id="botInner"></g></g>
+
+      <!-- what the robot will do next -->
+      <g id="intent" transform="translate(932,62)">
+        <rect x="-52" y="-34" width="104" height="68" rx="34" fill="#fff" stroke="#E2483D" stroke-width="5"/>
+        <g id="intentZap"><path d="M-14 -24 L-30 4 H-16 L-21 26 L0 -6 H-13 L-6 -24Z" fill="#E2483D"/>
+          <text id="intentN" x="22" y="16" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="44" fill="#E2483D">1</text></g>
+        <g id="intentOil" opacity="0"><path d="M0 -24 C10 -8 18 0 18 10 A18 18 0 0 1 -18 10 C-18 0 -10 -8 0 -24Z" fill="#2A2438"/><ellipse cx="-6" cy="6" rx="4" ry="6" fill="#fff" opacity=".35"/></g>
+      </g>
+      <g id="floaters"></g>
+    </svg>
+  </div>
+
+  <div id="panel">
+    <div id="charge" hidden>
+      <button id="say" class="round" aria-label="Hear the word again">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="#fff"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <div id="readword" hidden></div>
+      <div id="choices"></div>
+    </div>
+    <div id="cards" hidden>
+      <div id="hand"></div>
+      <button id="done" class="round" aria-label="End turn">
+        <svg viewBox="0 0 24 24"><path d="M5 12h12M12 6l6 6-6 6" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div id="sparks" aria-label="sparks"></div>
+  </div>
+
+  <div id="overlay">
+    <div class="title">Word <span>Bolt</span></div>
+    <button id="play" class="bigbtn" aria-label="Play">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg>
+    </button>
+  </div>
+
+  <div id="map" hidden>
+    <div class="maptop"><button id="closetBtn" aria-label="Change clothes"></button><div id="logo" class="title small">Word <span>Bolt</span></div></div>
+    <div id="floors"></div>
+    <button id="go" class="bigbtn" aria-label="Play the next robot"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg></button>
+  </div>
+
+  <div id="reward" hidden>
+    <div id="stars"></div>
+    <div id="gearNew" hidden></div>
+    <div id="rewardCards"></div>
+    <button id="again" class="bigbtn" hidden aria-label="Back to the map"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg></button>
+  </div>
+
+  <div id="closet" hidden>
+    <div id="closetHero"></div>
+    <div id="closetItems"></div>
+    <button id="closetDone" class="bigbtn" aria-label="Done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+
+  <div id="wipe" hidden><div class="door l"></div><div class="door r"></div></div>
+
+  <div id="parent" hidden>
+    <div class="pbox">
+      <div class="phead"><h2>Parent corner</h2><button id="pclose">Close</button></div>
+      <div id="pbody"></div>
+    </div>
+  </div>
+</div>
+<script type="module" src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.claude/
+.DS_Store
+# local-only: raw phonics downloads, rejected sound tries, and the sound test page that uses them
+audio/scr-raw/
+audio/try/
+audio/phonics-old/
+phonics.html
+__pycache__/
