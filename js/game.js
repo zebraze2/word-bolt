@@ -1,21 +1,22 @@
 import { FIRST_SETS, LAST_SETS, PICTURE_SETS, ZONES, LOCKED_FLOORS, CARDS, START_DECK, REWARDS, HEARTS, WORDS_PER_TURN, HAND_SIZE,
   starsFor, CLIPS, LETTERS, letterClip } from './data.js';
-import { BOLT, HEART, STAR, LOCK, botMarkup, CARD_ART, FX_ICON, PICS, heroMarkup, GEAR, SCENES } from './art.js';
+import { BOLT, HEART, STAR, LOCK, botMarkup, CARD_ART, FX_ICON, PICS, heroMarkup, GEAR, SCENES, ITEMS, ITEM, COIN, BLASTERS, itemPic } from './art.js';
 import { initAudio, say, stopVoice, sfx, wait } from './audio.js';
 
 const $ = s => document.querySelector(s);
 const SVGNS = 'http://www.w3.org/2000/svg';
 const params = new URLSearchParams(location.search);
 const ZONE = ZONES[0];
-const COMEBACK = 2;   // a missed word comes back this many questions later
+const COMEBACK = 2;
+const COINS_PER_STAR = 3;   // a missed word comes back this many questions later
 
 // ---------- save (only ever add fields; never rename or drop keys) ----------
 const KEY = 'wb-save' + (params.get('save') ? '-' + params.get('save') : '');
 function loadSave() {
   for (const k of [KEY, KEY + '-backup']) {
-    try { const j = JSON.parse(localStorage.getItem(k)); if (j && j.v) return { gear: [], wear: {}, ...j }; } catch (e) {}
+    try { const j = JSON.parse(localStorage.getItem(k)); if (j && j.v) return { gear: [], wear: {}, coins: 0, ...j }; } catch (e) {}
   }
-  return { v: 1, stars: {}, deck: START_DECK.slice(), words: {}, sawMap: false, unlocked: false, gear: [], wear: {} };
+  return { v: 1, stars: {}, deck: START_DECK.slice(), words: {}, sawMap: false, unlocked: false, gear: [], wear: {}, coins: 0 };
 }
 const save = loadSave();
 function persist() {
@@ -25,6 +26,15 @@ function persist() {
 // Fixing a robot always counts. Stars are a score he can come back and raise, never a gate.
 const beaten = r => (save.stars[r.id] || 0) >= 1;
 const nextRobot = () => ZONE.robots.find(r => !beaten(r));
+// Gear came in after some robots were already fixed: hand over anything he earned but never got.
+let gaveOldGear = false;
+for (const r of ZONE.robots) {
+  if (r.gear && beaten(r) && !save.gear.includes(r.gear)) {
+    const g = GEAR[r.gear];
+    save.gear.push(r.gear); save.wear[g.slot] = g.value; gaveOldGear = true;
+  }
+}
+if (gaveOldGear) { save.newGear = true; persist(); }
 const playable = r => save.unlocked || params.has('unlock') || beaten(r) || r === nextRobot();
 
 // ---------- battle state ----------
@@ -62,7 +72,7 @@ function float(text, x, y, color) {
   $('#floaters').appendChild(t); setTimeout(() => t.remove(), 1200);
 }
 function anim(sel, cls, ms) {
-  const el = $(sel); el.classList.remove(cls); void el.getBBox?.();
+  const el = typeof sel === 'string' ? $(sel) : sel; el.classList.remove(cls); void el.getBBox?.();
   el.classList.add(cls); return wait(ms).then(() => el.classList.remove(cls));
 }
 function drawBot(r) {
@@ -73,7 +83,7 @@ function drawBot(r) {
 }
 function renderHero() {
   $('#heroInner').innerHTML = heroMarkup(save.wear);
-  $('#blast').setAttribute('stroke', save.wear.gauntlet === 'laser' ? '#3BD48B' : '#FFC531');
+  $('#blast').setAttribute('stroke', (BLASTERS[save.wear.gauntlet] || BLASTERS.spark).beam);
 }
 const heroSvg = (w, cls = '') => `<svg class="${cls}" viewBox="-6 -14 150 172">${heroMarkup(w)}</svg>`;
 function setScene(r) { $('#bg').innerHTML = SCENES[r.scene].svg; }
@@ -418,10 +428,11 @@ async function result(r) {
   persist();
   const box = $('#stars');
   box.innerHTML = [0, 1, 2].map(() => `<span>${STAR('#FFC531')}</span>`).join('');
-  $('#rewardCards').innerHTML = ''; $('#again').hidden = true; $('#reward').hidden = false;
+  $('#rewardCards').innerHTML = ''; $('#coinsWon').hidden = true; $('#again').hidden = true; $('#reward').hidden = false;
   await wait(400);
   for (let i = 0; i < stars; i++) { box.children[i].classList.add('on'); sfx.spark(); await wait(450); }
   await say('p_stars' + stars);
+  await coinsWon(ok + stars * COINS_PER_STAR);
   if (!wasBeaten) {
     if (r.gear && !save.gear.includes(r.gear)) await gearPrize(r.gear);
     if (r === ZONE.robots[ZONE.robots.length - 1]) await say('p_floor');
@@ -430,6 +441,16 @@ async function result(r) {
   }
   $('#again').hidden = false;
   await new Promise(res => { $('#again').onclick = () => { $('#reward').hidden = true; res(); }; });
+}
+
+// a coin for every word read right (a fixed miss counts), plus a few for each star
+async function coinsWon(n) {
+  const box = $('#coinsWon');
+  box.innerHTML = `${COIN}<b>+0</b>`; box.hidden = false;
+  say('p_coins');
+  for (let i = 1; i <= n; i++) { box.querySelector('b').textContent = '+' + i; if (i % 2) sfx.spark(); await wait(70); }
+  save.coins += n; persist();
+  await wait(700);
 }
 
 async function gearPrize(id) {
@@ -480,7 +501,9 @@ function renderMap() {
       ${miniBot(r, state)}${state === 'locked' ? `<span class="lk">${LOCK}</span>` : ''}
       <span class="st">${[0, 1, 2].map(i => STAR(i < st ? '#FFC531' : 'rgba(255,255,255,.25)')).join('')}</span></button>`;
   }).join('');
-  $('#closetBtn').innerHTML = heroSvg(save.wear);
+  $('#closetBtn').innerHTML = `<span class="face">${heroSvg(save.wear)}</span>` + (shopReady() ? '<span class="new">★</span>' : '');
+  $('#closetBtn').classList.toggle('ready', shopReady());
+  $('#coinBadge').innerHTML = `${COIN}<b>${save.coins}</b>`;
   $('#floors').innerHTML = locked + `<div class="floor cur"><span class="badge" style="background:${ZONE.color}">${ZONE.label}</span><div class="slots">${slots}</div></div>`;
 }
 let onMap = null;
@@ -488,6 +511,8 @@ async function openMap() {
   renderMap();
   $('#map').hidden = false;
   if (!save.sawMap) { save.sawMap = true; persist(); say('p_map'); }
+  else if (save.newGear) say('p_newclothes');
+  else if (shopReady() && !S.toldShop) { S.toldShop = true; say('p_canbuy'); }
   const r = await new Promise(res => { onMap = res; });
   onMap = null;
   $('#map').hidden = true;
@@ -504,36 +529,47 @@ $('#floors').addEventListener('click', e => {
 });
 $('#go').onclick = () => { if (onMap) onMap(nextRobot() || ZONE.robots[ZONE.robots.length - 1]); };
 
-// ---------- closet: put on the gear he has won ----------
-const CLOSET = [
-  { slot: 'helmet', value: true, need: 'helmet', off: false, view: '12 -14 76 56' },
-  { slot: 'suit', value: 'blue', need: 'blue', off: 'orange', view: '14 54 72 70' },
-  { slot: 'gauntlet', value: 'laser', need: 'laser', off: 'spark', view: '86 50 54 54' },
-  { slot: 'cape', value: true, need: 'cape', off: false, view: '-4 56 70 100' },
-];
+// ---------- closet + shop: wear what he has, buy new clothes with coins ----------
+const owns = it => save.gear.includes(it.id);
+const wearing = it => save.wear[it.slot] === it.value || (it.value === true && save.wear[it.slot] === true);
+const shopReady = () => save.newGear || ITEMS.some(it => it.price && !owns(it) && it.price <= save.coins);
+const SLOT_ROWS = ['helmet', 'suit', 'gauntlet', 'cape', 'pet'];
 function renderCloset() {
   $('#closetHero').innerHTML = heroSvg(save.wear);
-  $('#closetItems').innerHTML = CLOSET.map((c, i) => {
-    const has = save.gear.includes(c.need);
-    const on = save.wear[c.slot] === c.value;
-    // a close-up of just this item
-    const pic = `<svg viewBox="${c.view}">${heroMarkup({ [c.slot]: c.value })}</svg>`;
-    return `<button class="item${on ? ' on' : ''}${has ? '' : ' locked'}" data-i="${i}">${has ? pic : LOCK}</button>`;
-  }).join('');
+  $('#closetCoins').innerHTML = `${COIN}<b>${save.coins}</b>`;
+  $('#closetItems').innerHTML = SLOT_ROWS.map(slot => `<div class="row">${ITEMS.filter(it => it.slot === slot).map(it => {
+    const has = owns(it), can = it.price && it.price <= save.coins;
+    const pic = itemPic(it);
+    const cls = has ? (wearing(it) ? ' on' : '') : it.robot ? ' locked' : can ? ' buy' : ' poor';
+    const tag = !has && it.price ? `<span class="price">${COIN}${it.price}</span>` : '';
+    const mini = !has && it.robot ? `<span class="lk">${LOCK}</span>` : '';
+    return `<button class="item${cls}" data-id="${it.id}" aria-label="${it.id}">${pic}${tag}${mini}</button>`;
+  }).join('')}</div>`).join('');
 }
 $('#closetBtn').onclick = () => {
   if (!onMap) return;
+  save.newGear = false; persist();
   renderCloset(); $('#closet').hidden = false; say('p_closet');
 };
-$('#closetItems').addEventListener('click', e => {
+$('#closetItems').addEventListener('click', async e => {
   const b = e.target.closest('.item');
-  if (!b) return;
-  const c = CLOSET[b.dataset.i];
-  if (!save.gear.includes(c.need)) { sfx.nope(); return; }
-  save.wear[c.slot] = save.wear[c.slot] === c.value ? c.off : c.value;
-  persist(); sfx.boing(); renderCloset();
+  if (!b || busy) return;
+  const it = ITEM[b.dataset.id];
+  if (owns(it)) {
+    save.wear[it.slot] = wearing(it) ? it.off : it.value;
+    persist(); sfx.boing(); renderCloset(); return;
+  }
+  if (it.robot) { sfx.nope(); anim(b, 'wiggle', 500); say('p_robotgear'); return; }
+  if (it.price > save.coins) { sfx.nope(); anim(b, 'wiggle', 500); say('p_poor'); return; }
+  busy = true;
+  save.coins -= it.price; save.gear.push(it.id); save.wear[it.slot] = it.value; persist();
+  sfx.win(); renderCloset();
+  $(`#closetItems [data-id="${it.id}"]`)?.classList.add('bought');
+  $('#closetHero svg')?.classList.add('gearhero');
+  await say(it.clip);
+  busy = false;
 });
-$('#closetDone').onclick = () => { $('#closet').hidden = true; renderHero(); renderMap(); };
+$('#closetDone').onclick = () => { stopVoice(); $('#closet').hidden = true; renderHero(); renderMap(); };
 
 // ---------- parent corner: hold the logo for 3 seconds ----------
 let holdTimer;
@@ -559,7 +595,7 @@ function openParent() {
   $('#punlock').onclick = () => { save.unlocked = !save.unlocked; persist(); renderMap(); openParent(); };
   $('#preset').onclick = e => {
     if (e.target.dataset.sure) {
-      Object.assign(save, { stars: {}, deck: START_DECK.slice(), words: {}, unlocked: false, gear: [], wear: {} });
+      Object.assign(save, { stars: {}, deck: START_DECK.slice(), words: {}, unlocked: false, gear: [], wear: {}, coins: 0, newGear: false });
       persist(); renderMap(); openParent();
     } else { e.target.dataset.sure = 1; e.target.textContent = 'Tap again to erase everything'; }
   };

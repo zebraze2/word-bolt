@@ -2,7 +2,7 @@
 
 A robot-battling reading game for one young reader: listen to a three-letter word, tap the one you hear to charge up sparks, then play cards to fix the glitchy robots. Built for an iPad in landscape.
 
-**Play:** https://zebraze2.github.io/word-bolt/
+**Play:** https://bregan.org/bolt/
 
 Static files, no build step. To run it locally: `python3 tools/serve.py`, then open http://localhost:5178/.
 

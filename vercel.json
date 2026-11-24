@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/bolt/", "destination": "/index.html" },
+    { "source": "/bolt/:path*", "destination": "/:path*" }
+  ]
+}

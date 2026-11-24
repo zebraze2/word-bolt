@@ -90,49 +90,137 @@ export const PICS = {
 };
 
 // ---------- the hero ----------
-// Drawn in a 140 x 160 box, feet at y = 150. wear: {suit, helmet, gauntlet, cape}
-export const SUITS = { orange: '#FF8A3D', blue: '#3B82F6' };
+// Drawn in a 140 x 160 box, feet at y = 150. wear: {suit, helmet, gauntlet, cape, pet}
+// (old saves use helmet: true for the rocket helmet and cape: true for the red cape)
+export const SUITS = { orange: '#FF8A3D', blue: '#3B82F6', red: '#E2483D', green: '#34B36B', purple: '#8B5CF6', pink: '#F472B6' };
+const EMBLEM = {
+  blue: '<path d="M44 66 L38 80 H46 L42 92 L54 76 H46 L50 66Z" fill="#FFC531"/>',
+  red: '<path d="M49 66 l3.6 7.4 8.1 1.1-5.9 5.7 1.4 8-7.2-3.8-7.2 3.8 1.4-8-5.9-5.7 8.1-1.1z" fill="#FFE27A"/>',
+  green: '<path d="M40 90 C40 72 54 66 60 66 C60 80 52 90 40 90Z" fill="#B8F5C9"/><path d="M41 89 L56 70" stroke="#1F7A48" stroke-width="2"/>',
+  purple: '<path d="M54 66 A12 12 0 1 0 54 90 A9 9 0 1 1 54 66Z" fill="#FFE27A"/>',
+  pink: '<path d="M49 90 C36 81 38 68 45 68 C47 68 49 70 49 72 C49 70 51 68 53 68 C60 68 62 81 49 90Z" fill="#fff"/>',
+};
+export const BLASTERS = {
+  spark: { body: '#FFC531', edge: '#C98D00', glow: '#FFE27A', tip: '#FFF7D1', beam: '#FFC531' },
+  laser: { body: '#2A3550', edge: '#3BD48B', glow: '#7CF5B5', tip: '#3BD48B', beam: '#3BD48B' },
+  ice: { body: '#BDEBFF', edge: '#3AA0D8', glow: '#8FE3FF', tip: '#fff', beam: '#5CC8FF' },
+  fire: { body: '#E2483D', edge: '#9E2A22', glow: '#FFB25C', tip: '#FFC531', beam: '#FF7A2E' },
+  bubble: { body: '#F9A8D4', edge: '#DB5A9E', glow: '#FFD6EC', tip: '#fff', beam: '#F472B6' },
+};
+const CAPES = { red: ['#E2483D', '#B5302A'], blue: ['#2563EB', '#1A47B0'], purple: ['#7C3AED', '#5521B5'], rainbow: ['url(#capeRbw)', '#8B5CF6'] };
+const HATS = {
+  rocket: `<path d="M45 8 L50 -10 L55 8Z" fill="#E2483D"/><path d="M19 34 C19 2 79 2 79 34 Z" fill="#EEF2F8" stroke="#B9C4D6" stroke-width="2"/>
+    <rect x="22" y="24" width="54" height="9" rx="4.5" fill="#2563EB"/><circle cx="30" cy="16" r="3" fill="#FFC531"/><circle cx="68" cy="16" r="3" fill="#FFC531"/>`,
+  crown: `<path d="M24 24 L22 2 L34 13 L42 -4 L49 10 L56 -4 L64 13 L76 2 L74 24Z" fill="#FFC531" stroke="#C98D00" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="49" cy="18" r="3.5" fill="#E2483D"/><circle cx="35" cy="19" r="2.6" fill="#3B82F6"/><circle cx="63" cy="19" r="2.6" fill="#34B36B"/>`,
+  cowboy: `<ellipse cx="49" cy="20" rx="40" ry="7" fill="#9A5B2E"/><path d="M29 20 C28 -6 70 -6 69 20Z" fill="#B8733F"/>
+    <path d="M30 14 H68 V19 H30Z" fill="#5A3418"/><path d="M49 -1 C46 4 46 8 49 9 C52 8 52 4 49 -1Z" fill="#9A5B2E"/>`,
+  pirate: `<path d="M12 24 Q49 -14 86 24 Q49 12 12 24Z" fill="#1D2433"/><path d="M14 24 Q49 14 84 24" stroke="#FFC531" stroke-width="2.5" fill="none"/>
+    <circle cx="49" cy="8" r="5" fill="#fff"/><circle cx="47" cy="7" r="1.2" fill="#1D2433"/><circle cx="51" cy="7" r="1.2" fill="#1D2433"/>
+    <path d="M43 15 L55 11 M43 11 L55 15" stroke="#fff" stroke-width="2"/>`,
+  wizard: `<path d="M24 22 L50 -12 L74 22Z" fill="#3B4FCF"/><ellipse cx="49" cy="22" rx="32" ry="5.5" fill="#2F3FA8"/>
+    <path d="M50 2 l2 4 4.4.6-3.2 3.1.8 4.4-4-2.1-4 2.1.8-4.4-3.2-3.1 4.4-.6z" fill="#FFE27A"/><circle cx="38" cy="15" r="2" fill="#FFE27A"/><circle cx="61" cy="12" r="1.6" fill="#FFE27A"/>`,
+  cap: `<path d="M20 28 C20 -2 78 -2 78 28Z" fill="#E2483D"/><path d="M70 22 Q94 20 98 29 L68 29Z" fill="#B5302A"/>
+    <circle cx="49" cy="3" r="3" fill="#B5302A"/><path d="M40 12 L49 4 L58 12" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+};
+const PETS = {
+  pup: `<g transform="translate(100,116)"><ellipse cx="20" cy="35" rx="20" ry="3.5" fill="#000" opacity=".12"/>
+    <path d="M36 14 L44 6" stroke="#8A97AD" stroke-width="3" stroke-linecap="round"/>
+    <rect x="6" y="14" width="32" height="16" rx="7" fill="#B9C4D6"/><rect x="9" y="28" width="6" height="7" rx="2" fill="#5B6B85"/><rect x="29" y="28" width="6" height="7" rx="2" fill="#5B6B85"/>
+    <rect x="-4" y="0" width="22" height="20" rx="7" fill="#DCE3EE"/><path d="M0 0 L-4 -9 L6 -2Z" fill="#8A97AD"/><path d="M16 0 L20 -9 L10 -2Z" fill="#8A97AD"/>
+    <rect x="-1" y="6" width="16" height="7" rx="3.5" fill="#1D2433"/><circle cx="3.5" cy="9.5" r="2" fill="#7CF5B5"/><circle cx="10.5" cy="9.5" r="2" fill="#7CF5B5"/>
+    <circle cx="-3" cy="16" r="2.4" fill="#1D2433"/></g>`,
+  dino: `<g transform="translate(98,112)"><ellipse cx="22" cy="39" rx="20" ry="3.5" fill="#000" opacity=".12"/>
+    <path d="M34 26 Q48 26 46 14 Q42 24 32 20Z" fill="#34B36B"/>
+    <path d="M14 10 L18 2 L22 10 L26 4 L30 12 L34 8 L35 16Z" fill="#FF8A3D"/>
+    <ellipse cx="22" cy="24" rx="15" ry="12" fill="#5ED38A"/><ellipse cx="22" cy="28" rx="9" ry="7" fill="#C9F5D7"/>
+    <rect x="12" y="32" width="7" height="7" rx="3" fill="#34B36B"/><rect x="25" y="32" width="7" height="7" rx="3" fill="#34B36B"/>
+    <circle cx="6" cy="12" r="10" fill="#5ED38A"/><circle cx="3" cy="10" r="2.4" fill="#1D2433"/><circle cx="2.2" cy="9.2" r=".8" fill="#fff"/>
+    <path d="M-2 16 Q2 18 6 16" stroke="#1D2433" stroke-width="1.6" fill="none" stroke-linecap="round"/></g>`,
+};
 export function heroMarkup(w = {}) {
   const suit = SUITS[w.suit] || SUITS.orange;
-  const laser = w.gauntlet === 'laser';
-  const cape = w.cape ? `<path d="M30 64 C8 92 4 128 10 150 L44 140 L56 66Z" fill="#E2483D"/><path d="M30 64 C14 96 12 124 16 146" stroke="#B5302A" stroke-width="3" fill="none"/>` : '';
-  const goggles = w.helmet ? '' : `<rect x="24" y="17" width="50" height="13" rx="6.5" fill="#3B4A66"/>
+  const hat = w.helmet === true ? 'rocket' : w.helmet;
+  const capeName = w.cape === true ? 'red' : w.cape;
+  const bl = BLASTERS[w.gauntlet] || BLASTERS.spark;
+  const cc = CAPES[capeName];
+  const cape = cc ? `<defs><linearGradient id="capeRbw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E2483D"/><stop offset=".25" stop-color="#FFC531"/><stop offset=".5" stop-color="#34B36B"/><stop offset=".75" stop-color="#3B82F6"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs>
+    <path d="M30 64 C8 92 4 128 10 150 L44 140 L56 66Z" fill="${cc[0]}"/><path d="M30 64 C14 96 12 124 16 146" stroke="${cc[1]}" stroke-width="3" fill="none"/>
+    ${capeName === 'purple' ? '<circle cx="22" cy="104" r="2.6" fill="#FFE27A"/><circle cx="32" cy="124" r="2" fill="#FFE27A"/><circle cx="18" cy="134" r="2.2" fill="#FFE27A"/><circle cx="38" cy="96" r="1.8" fill="#FFE27A"/>' : ''}` : '';
+  const goggles = hat ? '' : `<rect x="24" y="17" width="50" height="13" rx="6.5" fill="#3B4A66"/>
     <circle cx="38" cy="23.5" r="7.5" fill="#8FE3FF" stroke="#3B4A66" stroke-width="2"/><circle cx="60" cy="23.5" r="7.5" fill="#8FE3FF" stroke="#3B4A66" stroke-width="2"/>`;
-  const helmet = w.helmet ? `<path d="M45 8 L50 -10 L55 8Z" fill="#E2483D"/><path d="M19 34 C19 2 79 2 79 34 Z" fill="#EEF2F8" stroke="#B9C4D6" stroke-width="2"/>
-    <rect x="22" y="24" width="54" height="9" rx="4.5" fill="#2563EB"/><circle cx="30" cy="16" r="3" fill="#FFC531"/><circle cx="68" cy="16" r="3" fill="#FFC531"/>` : '';
-  const gaunt = laser
+  const gaunt = w.gauntlet === 'laser'
     ? `<circle cx="116" cy="77" r="17" fill="#7CF5B5" opacity=".45"/><rect x="96" y="66" width="22" height="24" rx="6" fill="#2A3550" stroke="#3BD48B" stroke-width="3"/>
        <rect x="116" y="72" width="16" height="11" rx="3" fill="#3BD48B"/><circle cx="107" cy="78" r="4" fill="#7CF5B5"/>`
-    : `<circle cx="111" cy="77" r="17" fill="#FFE27A" opacity=".45"/><rect x="98" y="64" width="26" height="27" rx="9" fill="#FFC531" stroke="#C98D00" stroke-width="2"/>
-       <circle cx="111" cy="77.5" r="5" fill="#FFF7D1"/>`;
+    : `<circle cx="111" cy="77" r="17" fill="${bl.glow}" opacity=".45"/><rect x="98" y="64" width="26" height="27" rx="9" fill="${bl.body}" stroke="${bl.edge}" stroke-width="2"/>
+       <circle cx="111" cy="77.5" r="5" fill="${bl.tip}"/>
+       ${w.gauntlet === 'ice' ? '<path d="M111 70 V85 M104.5 73.8 L117.5 81.2 M104.5 81.2 L117.5 73.8" stroke="#3AA0D8" stroke-width="2" stroke-linecap="round"/>' : ''}
+       ${w.gauntlet === 'fire' ? '<path d="M111 70 C116 75 117 80 111 85 C105 80 107 76 111 70Z" fill="#FFC531"/>' : ''}
+       ${w.gauntlet === 'bubble' ? '<circle cx="130" cy="64" r="5" fill="none" stroke="#DB5A9E" stroke-width="1.8"/><circle cx="136" cy="76" r="3.4" fill="none" stroke="#DB5A9E" stroke-width="1.6"/><circle cx="126" cy="54" r="2.6" fill="none" stroke="#DB5A9E" stroke-width="1.4"/>' : ''}`;
   return `
     <ellipse cx="50" cy="152" rx="40" ry="7" fill="#000" opacity=".12"/>
     ${cape}
     <rect x="8" y="64" width="26" height="44" rx="8" fill="#5B6B85"/>
-    <path d="M23 74 L16 88 H22 L18 100 L28 84 H22 L26 74Z" fill="${laser ? '#3BD48B' : '#FFC531'}"/>
+    <path d="M23 74 L16 88 H22 L18 100 L28 84 H22 L26 74Z" fill="${bl.beam}"/>
     <rect x="31" y="112" width="14" height="32" rx="6" fill="#2C3E66"/><rect x="53" y="112" width="14" height="32" rx="6" fill="#2C3E66"/>
     <rect x="26" y="138" width="22" height="11" rx="5" fill="#EEF2F8"/><rect x="50" y="138" width="22" height="11" rx="5" fill="#EEF2F8"/>
     <rect x="24" y="60" width="50" height="60" rx="18" fill="${suit}"/>
     <rect x="24" y="98" width="50" height="7" fill="#2C3E66"/><circle cx="49" cy="101.5" r="5" fill="#FFC531"/>
-    ${w.suit === 'blue' ? '<path d="M44 66 L38 80 H46 L42 92 L54 76 H46 L50 66Z" fill="#FFC531"/>' : ''}
+    ${EMBLEM[w.suit] || ''}
     <circle cx="49" cy="38" r="27" fill="#F0BE96"/>
     <path d="M22 36 C22 12 76 8 76 34 C70 22 58 18 48 22 C40 18 28 24 22 36Z" fill="#4A2F1E"/>
     ${goggles}
     <circle cx="41" cy="42" r="3.4" fill="#1D2433"/><circle cx="58" cy="42" r="3.4" fill="#1D2433"/>
     <circle cx="35" cy="50" r="4" fill="#F59C8A" opacity=".6"/><circle cx="64" cy="50" r="4" fill="#F59C8A" opacity=".6"/>
     <path d="M43 52 Q49.5 58 56 52" stroke="#1D2433" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-    ${helmet}
+    ${HATS[hat] || ''}
     <rect x="62" y="70" width="42" height="15" rx="7.5" fill="${suit}"/>
     ${gaunt}
+    ${PETS[w.pet] || ''}
     <g class="shield" opacity="0"><ellipse cx="60" cy="80" rx="70" ry="86" fill="#6EA8FF" opacity=".22" stroke="#2563EB" stroke-width="4" stroke-dasharray="10 6"/></g>`;
 }
-// gear won from robots; each one changes one part of the outfit
-export const GEAR = {
-  helmet: { slot: 'helmet', value: true, clip: 'p_gear_helmet' },
-  blue: { slot: 'suit', value: 'blue', clip: 'p_gear_blue' },
-  laser: { slot: 'gauntlet', value: 'laser', clip: 'p_gear_laser' },
-  cape: { slot: 'cape', value: true, clip: 'p_gear_cape' },
-};
+
+// Everything he can wear. `robot` items are won by fixing that robot; the rest he buys with coins.
+// off: what that slot goes back to when he takes the item off.
+const OFF = { helmet: false, suit: 'orange', gauntlet: 'spark', cape: false, pet: false };
+const V = { helmet: '12 -14 76 56', suit: '14 54 72 70', gauntlet: '86 46 56 56', cape: '-4 56 70 100', pet: '92 98 52 58' };
+const item = (id, slot, value, o = {}) => ({ id, slot, value, off: OFF[slot], view: V[slot], clip: 'p_buy_' + id, ...o });
+export const ITEMS = [
+  item('helmet', 'helmet', true, { robot: 'o1', clip: 'p_gear_helmet' }),
+  item('crown', 'helmet', 'crown', { price: 10 }),
+  item('cap', 'helmet', 'cap', { price: 10 }),
+  item('cowboy', 'helmet', 'cowboy', { price: 15 }),
+  item('pirate', 'helmet', 'pirate', { price: 15 }),
+  item('wizard', 'helmet', 'wizard', { price: 20 }),
+  item('blue', 'suit', 'blue', { robot: 'o2', clip: 'p_gear_blue' }),
+  item('red', 'suit', 'red', { price: 15 }),
+  item('green', 'suit', 'green', { price: 15 }),
+  item('purple', 'suit', 'purple', { price: 20 }),
+  item('pink', 'suit', 'pink', { price: 20 }),
+  item('laser', 'gauntlet', 'laser', { robot: 'o3', clip: 'p_gear_laser' }),
+  item('ice', 'gauntlet', 'ice', { price: 20 }),
+  item('fire', 'gauntlet', 'fire', { price: 20 }),
+  item('bubble', 'gauntlet', 'bubble', { price: 25 }),
+  item('cape', 'cape', true, { robot: 'o4', clip: 'p_gear_cape' }),
+  item('bluecape', 'cape', 'blue', { price: 25 }),
+  item('starcape', 'cape', 'purple', { price: 25 }),
+  item('rainbow', 'cape', 'rainbow', { price: 30 }),
+  item('pup', 'pet', 'pup', { price: 30 }),
+  item('dino', 'pet', 'dino', { price: 30 }),
+];
+export const ITEM = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+// robot gear keeps its old name for older saves
+export const GEAR = Object.fromEntries(ITEMS.filter(i => i.robot).map(i => [i.id, i]));
+// a close-up of one item for the closet; capes are drawn on their own so the body doesn't hide them
+export function itemPic(it) {
+  if (it.slot === 'cape') {
+    const m = heroMarkup({ cape: it.value }).match(/<defs>[\s\S]*?<\/defs>[\s\S]*?(?=<rect x="8")/);
+    return `<svg viewBox="-2 56 64 100">${m ? m[0] : ''}</svg>`;
+  }
+  return `<svg viewBox="${it.view}">${heroMarkup({ [it.slot]: it.value })}</svg>`;
+}
+export const COIN = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="#FFC531" stroke="#C98D00" stroke-width="1.6"/><circle cx="12" cy="12" r="7" fill="none" stroke="#E0A800" stroke-width="1.2"/>
+  <path d="M12 6.8l1.6 3.3 3.6.5-2.6 2.5.6 3.6-3.2-1.7-3.2 1.7.6-3.6-2.6-2.5 3.6-.5z" fill="#FFF3C4"/></svg>`;
 
 // ---------- worlds: one per robot (1000 x 400, floor at y = 338) ----------
 const stars = n => Array.from({ length: n }, (_, i) => `<circle cx="${(i * 137) % 1000}" cy="${(i * 53) % 230 + 8}" r="${i % 3 ? 1.6 : 2.6}" fill="#fff" opacity="${.5 + (i % 4) * .12}"/>`).join('');
