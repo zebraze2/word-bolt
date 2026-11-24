@@ -6,3 +6,4 @@ audio/try/
 audio/phonics-old/
 phonics.html
 __pycache__/
+.vercel
